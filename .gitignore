@@ -8,6 +8,6 @@
 *.tmp
 *.user
 *.pidb
-sise 1.sdf
+*.sdf
 sysinfo.txt
 Debug

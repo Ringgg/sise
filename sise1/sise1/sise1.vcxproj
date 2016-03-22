@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{455DDF3F-82D7-4A99-981E-0F3DBC9A44DE}</ProjectGuid>
+    <ProjectGuid>{3EE699BA-8733-4313-B7C4-BCA5E80CDEA3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>sise1</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
