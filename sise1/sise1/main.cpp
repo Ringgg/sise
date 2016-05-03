@@ -2,6 +2,8 @@
 #include <math.h>
 #include <map>
 #include <queue>
+#include <string>
+#include <sstream>
 
 #define w 4
 #define h 4
@@ -35,13 +37,13 @@ char GetMove(uint64_t before, uint64_t after)
 	}
 
 	if (x0 > 0 && Swap(before, x0, y0, x0 - 1, y0) == after)
-		return 'D'; //Dó³
-	if (x0 < w - 1 && Swap(before, x0, y0, x0 + 1, y0) == after)
-		return 'G'; //Góra
-	if (y0 > 0 && Swap(before, x0, y0, x0, y0 - 1) == after)
 		return 'P'; //Prawo
-	if (y0 < h - 1 && Swap(before, x0, y0, x0, y0 + 1) == after)
+	if (x0 < w - 1 && Swap(before, x0, y0, x0 + 1, y0) == after)
 		return 'L'; //Lewo
+	if (y0 > 0 && Swap(before, x0, y0, x0, y0 - 1) == after)
+		return 'D'; //Dó³
+	if (y0 < h - 1 && Swap(before, x0, y0, x0, y0 + 1) == after)
+		return 'G'; //Góra
 
 	return 0;		//B³¹d
 }
@@ -74,8 +76,8 @@ void DisplayMoves(map< uint64_t, uint64_t >& visited, uint64_t code)
 	uint64_t next = visited[code];
 	if (next)
 	{
-		cout << GetMove(code, next);
 		DisplayMoves(visited, next);
+		cout << GetMove(code, next);
 	}
 }
 
@@ -244,16 +246,22 @@ bool A(map<uint64_t, uint64_t>& visited, priority_queue<State>& que)
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+	string choice;
+	stringstream convert(argv[1]);
+	if (!(convert >> choice))
+	{
+		cout << "\nERROR\npossible arguments: dfs / bfs / a";
+		return -1;
+	}
+	
 	map< uint64_t, uint64_t > visited;
 	uint64_t tmp;
 	uint64_t data = 0;
-	int choice;
 	int x0, y0;
-	cout << "	PIETNASTKA \nwybierz algorytm: \n1. DFS \n2. BFS \n3. A*\n";
-	cin >> choice;
-	cout << "\n\nWprowadz wartosci 16 pol ukladanki: ";
+
+	cin >> tmp >> tmp;
 	
 	for (int i = 0; i < 16; ++i)
 	{
@@ -268,36 +276,41 @@ int main()
 		}
 	}
 
-	if (choice == 1)
+
+	if (choice == "dfs")
 	{
 		DFS(visited, data, 0L, x0, y0);
 	}
-	if (choice == 2)
+	else if (choice == "bfs")
 	{
 		queue<State> que;
 		que.push(State(data, 0x0L, x0, y0, 0));
 		BFS(visited, que);
 	}
-	if (choice == 3)
+	else if (choice == "a")
 	{
 		priority_queue<State> pQue;
 		pQue.push(State(data, 0x0L, x0, y0, 0));
 		A(visited, pQue);
 	}
+	else
+	{
+		cout << "\nERROR\npossible arguments: dfs / bfs / a";
+		return -1;
+	}
 
-	steps = DisplayHistory(visited, 0x123456789abcdef);
+	//steps = DisplayHistory(visited, 0x123456789abcdef);
+	//DisplayMoves(visited, 0x123456789abcdef);
 
-	cout << "\n";
+	//cout << dec << "\nilosc przetworzonych stanow: " << states;
+	//cout << dec << "\nmaksymalna glebokosc rekursji: " << maxDepth;
+	//cout << dec << "\nilosc wykonanych krokow: " << steps;
 
+	Display(data);
 	DisplayMoves(visited, 0x123456789abcdef);
 
-	cout << dec << "\nilosc przetworzonych stanow: " << states;
-	cout << dec << "\nmaksymalna glebokosc rekursji: " << maxDepth;
-	cout << dec << "\nilosc wykonanych krokow: " << steps;
-
-	cin >> tmp;
 	return 0;
 }
 
 // example input
-// 1 1 5 2 3 4 0 6 7 8 9 10 11 12 13 14 15
+// 4 4 1 5 2 3 4 0 6 7 8 9 10 11 12 13 14 15
