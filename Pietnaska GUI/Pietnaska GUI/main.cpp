@@ -3,6 +3,7 @@
 #include <iostream>
 #include <SOIL.h>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -13,11 +14,23 @@ GLuint texture;
 int position = 0;
 vector<int*> board;
 
+string setFileName()
+{
+	string name;
+	system("dir /b *.txt");
+
+	cin >> name;
+
+	if (name[name.size() - 1] == 't' && name[name.size() - 2] == 'x' && name[name.size() - 3] == 't' && name[name.size() - 4] == '.');
+	else
+		name += ".txt";
+	return name;
+}
+
 void readFile(string name)
 {
 	fstream file;
 	int *tab;
-
 	file.open(name, ios::in);
 	string testLine;
 	if (file.good())
@@ -95,13 +108,12 @@ void display()
 			glTranslatef((256 * modulo), -(256*(i/4)), 0);
 			glCallList(board[position][i]);
 		glPopMatrix();
-		cout << i<< "  "<<temp << endl;
 	}
 	
 	position++;
 	glutPostRedisplay();
 	glutSwapBuffers();
-	Sleep(3000);
+	Sleep(2000);
 }
 
 void createTable()
@@ -145,9 +157,7 @@ GLuint loadTexture(string path)
 void main(int argc, char **argv)
 {
 	string path = "lena.png";
-	string name = "output.txt";
-
-	readFile(name);
+	readFile(setFileName());
 	position = 0;
 	glutInit(&argc, argv);
 

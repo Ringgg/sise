@@ -110,13 +110,13 @@ char GetMove(uint64_t before, uint64_t after)
 
 void Display(uint64_t code)
 {
-	cout << "\n";
 	for (int i = 0; i < h; ++i)
 	{
 		for (int j = 0; j < w; ++j)
 			cout << hex << Get(i * w + j, code) << " ";
 		cout << "\n";
 	}
+	cout << "\n";
 }
 
 
@@ -272,12 +272,12 @@ int main(int argc, char* argv[])
 	}
 
 	steps = DisplayHistory(visited, 0x123456789abcdef);
-	cout << "Ruchy: ";
+	//cout << "Ruchy: ";
 	DisplayMoves(visited, 0x123456789abcdef);
 
-	cout << dec << "\nilosc przetworzonych stanow: " << states;
-	cout << dec << "\nmaksymalna glebokosc rekursji: " << maxDepth;
-	cout << dec << "\nilosc wykonanych krokow: " << steps;
+	//cout << dec << "\nilosc przetworzonych stanow: " << states;
+	//cout << dec << "\nmaksymalna glebokosc rekursji: " << maxDepth;
+	//cout << dec << "\nilosc wykonanych krokow: " << steps;
 
 	//Display(data);
 	//DisplayMoves(visited, 0x123456789abcdef);
