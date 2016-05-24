@@ -4,13 +4,14 @@
 #include <queue>
 #include <string>
 #include <sstream>
+#include <time.h>
+#include <random>
 
-#define w 4
-#define h 4
-#define maxMoves 15
+#define maxMoves 1000
 
 using namespace std;
-
+int w = 4;
+int h = 3;
 int states = 0;
 int maxDepth = 0;
 int steps = 0;
@@ -24,6 +25,7 @@ uint64_t Swap(uint64_t code, int x0, int y0, int x2, int y2);
 bool WasVisited(map< uint64_t, Visit >& visited, uint64_t code);
 
 int GetScore(uint64_t code);
+int GetScore2(uint64_t code);
 char GetMove(uint64_t before, uint64_t after);
 
 
@@ -58,18 +60,17 @@ struct State
 };
 
 
-uint64_t Get(int index, uint64_t code) { return ( code & (0xf000000000000000L >> (index * 4)) ) >> ( (15 - index) * 4 ); }
-uint64_t Set(int index, uint64_t code, uint64_t value) { return ( code & (~(0xf000000000000000L >> (index * 4))) ) + (value << ((15 - index) * 4)); }
+uint64_t Get(int i, uint64_t code) { return ( code & ((uint64_t)0xf << (i << 2) ) ) >> (i << 2); }
+uint64_t Set(int i, uint64_t code, uint64_t val) { return ( code & (~((uint64_t)0xf << (i << 2))) ) | (val << (i << 2)); }
 uint64_t Swap(uint64_t code, int x0, int y0, int x2, int y2) { return Set(x2 + y2 * w, Set(x0 + y0 * w, code, Get(x2 + y2 * w, code)), 0); }
 bool WasVisited(map< uint64_t, Visit >& visited, uint64_t code) { return visited.find(code) != visited.end(); }
-
 
 int GetScore(uint64_t code)
 {
 	static int desX, desY, result, i;
 	result = 0;
 
-	for (i = 0; i < 16; ++i)
+	for (i = 0; i < h * w; ++i)
 	{
 		desX = Get(i, code) / w;
 		desY = Get(i, code) % w;
@@ -80,17 +81,39 @@ int GetScore(uint64_t code)
 }
 
 
+int GetScore2(uint64_t code)
+{
+	static int desX, desY, result, i;
+	result = 0;
+
+	for (i = 0; i < h * w; ++i)
+	{
+		desX = Get(i, code) / w;
+		desY = Get(i, code) % w;
+		if ((desX - i / w) == 0 && (desY - i%w) == 0) result--;
+	}
+
+	return result;
+}
+
+
+int IsSolvable(uint64_t code)
+{
+	return GetScore(code) % 2 == 0;
+}
+
+
 char GetMove(uint64_t before, uint64_t after)
 {
 	int x0, y0;
 	uint64_t tmp;
 
-	for (int i = 0; i < 16; ++i)
+	for (int i = 0; i < h * w; ++i)
 	{
 		if (!Get(i, before))
 		{
-			x0 = i % 4;
-			y0 = i / 4;
+			x0 = i % w;
+			y0 = i / w;
 			break;
 		}
 	}
@@ -156,11 +179,11 @@ bool DFS(map<uint64_t, Visit>& visited, uint64_t value, uint64_t lastVal, int x0
 
 	if (x0 > 0)
 		result = DFS(visited, Swap(value, x0, y0, x0 - 1, y0), value, x0 - 1, y0, moves + 1);
-	if (!result && x0 < 3)
+	if (!result && x0 < w - 1)
 		result = DFS(visited, Swap(value, x0, y0, x0 + 1, y0), value, x0 + 1, y0, moves + 1);
 	if (!result && y0 > 0)
 		result = DFS(visited, Swap(value, x0, y0, x0, y0 - 1), value, x0, y0 - 1, moves + 1);
-	if (!result && y0 < 3)
+	if (!result && y0 < h - 1)
 		result = DFS(visited, Swap(value, x0, y0, x0, y0 + 1), value, x0, y0 + 1, moves + 1);
 
 	return result;
@@ -173,7 +196,7 @@ bool BFS(map<uint64_t, Visit>& visited, queue<State>& que)
 	que.pop();
 	
 	if (n.moves > maxMoves || WasVisited(visited, n.value)) return false;
-
+	
 	++states;
 	maxDepth = (n.moves > maxDepth) ? n.moves : maxDepth;
 	visited[n.value] = Visit( n.lastVal, n.moves );
@@ -220,6 +243,7 @@ bool A(map<uint64_t, Visit>& visited, priority_queue<State>& que)
 
 int main(int argc, char* argv[])
 {
+	srand(time(0));
 	string choice;
 	stringstream convert(argv[1]);
 	if (!(convert >> choice))
@@ -233,12 +257,12 @@ int main(int argc, char* argv[])
 	uint64_t data = 0;
 	int x0, y0;
 
-	cin >> tmp >> tmp;
+	cin >> w >> h;
 	
-	for (int i = 0; i < 16; ++i)
+	for (int i = 0; i < h * w; ++i)
 	{
 		cin >> tmp;
-		tmp <<= (15 - i) * 4;
+		tmp <<= i * 4;
 		data += tmp;
 
 		if (tmp == 0)
@@ -248,6 +272,38 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	int random;
+	for (int i = 0; i < 10000; ++i)
+	{
+		random = rand() % 4;
+
+		if (random == 0 && x0 > 0)
+		{
+			data = Swap(data, x0, y0, x0 - 1, y0);
+			x0--;
+		}
+		if (random == 1 && x0 < w - 1)
+		{
+			data = Swap(data, x0, y0, x0 + 1, y0);
+			x0++;
+		}
+		if (random == 2 && y0 > 0)
+		{
+			data = Swap(data, x0, y0, x0, y0 - 1);
+			y0--;
+		}
+		if (random == 3 && y0 < h - 1)
+		{
+			data = Swap(data, x0, y0, x0, y0 + 1);
+			y0++;
+		}
+	}
+	
+	if (!IsSolvable(data))
+	{
+		cout << "\nERROR\npuzzle is unsolvable";
+		return -1;
+	}
 
 	if (choice == "dfs")
 	{
@@ -257,13 +313,13 @@ int main(int argc, char* argv[])
 	{
 		queue<State> que;
 		que.push(State(data, 0x0L, x0, y0, 0));
-		while (BFS(visited, que) == false && que.empty() == false) { ; }
+		while (que.empty() == false && BFS(visited, que) == false) { ; }
 	}
 	else if (choice == "a")
 	{
 		priority_queue<State> pQue;
 		pQue.push(State(data, 0x0L, x0, y0, 0));
-		while (A(visited, pQue) == false && pQue.empty() == false) { ; }
+		while (pQue.empty() == false && A(visited, pQue) == false) { ; }
 	}
 	else
 	{
@@ -271,9 +327,14 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	steps = DisplayHistory(visited, 0x123456789abcdef);
-	cout << "Ruchy: ";
-	DisplayMoves(visited, 0x123456789abcdef);
+	uint64_t solution = 0;
+	for (int i = 0; i < w * h; ++i)
+		solution += (uint64_t)i << (i * 4);
+	
+	steps = DisplayHistory(visited, solution);
+	cout << dec << steps;
+	cout << "\nRuchy: ";
+	DisplayMoves(visited, solution);
 
 	cout << dec << "\nilosc przetworzonych stanow: " << states;
 	cout << dec << "\nmaksymalna glebokosc rekursji: " << maxDepth;
@@ -286,7 +347,12 @@ int main(int argc, char* argv[])
 }
 
 // example input
-// 4 4 1 5 2 3 4 0 6 7 8 9 10 11 12 13 14 15
+// 4 4
+//1 5 2 3
+//4 0 6 7
+//8 9 10 11
+//12 13 14 15
+
 // 4 4 1 2 3 0 4 5 6 7 8 9 10 11 12 13 14 15
 // 4 4 1 2 3 7 4 5 6 11 8 9 10 15 12 13 14 0
 
@@ -296,4 +362,6 @@ int main(int argc, char* argv[])
 //12 8 14 11
 //9 0 13 15
 
+
+// 4 4 1 2 0 3 4 5 6 7 8 9
 // 4 4 0 4 3 6 8 1 5 2 13 10 14 7 9 12 15 11
