@@ -133,13 +133,12 @@ char GetMove(uint64_t before, uint64_t after)
 
 void Display(uint64_t code)
 {
-	cout << "\n";
 	for (int i = 0; i < h; ++i)
 	{
 		for (int j = 0; j < w; ++j)
-			cout << hex << Get(i * w + j, code) << " ";
-		cout << "\n";
+			cout << hex << Get(i * w + j, code);
 	}
+	cout << "\n";
 }
 
 
